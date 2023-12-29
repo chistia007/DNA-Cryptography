@@ -3,9 +3,12 @@ package Sender;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.Arrays;
 
 public class ImageToCiphertext {
    private static String key="";
+   private static StringBuilder st;
+    private static String dnaComplimentRule4;
    public static void main(String[] args) {
 
         // key matrix generation first
@@ -41,7 +44,7 @@ public class ImageToCiphertext {
                 e.printStackTrace();
             }
 
-            // convert to the regular dna cipher and write it to Dna_Cipher.txt
+            // convert binary to the regular dna cipher and write it to Dna_Cipher.txt
             String dnaCipherText= getDNACipherText(binaryString);
             try (FileWriter writer = new FileWriter("DNA_Cipher.txt")) {
                 writer.write(dnaCipherText);
@@ -50,7 +53,7 @@ public class ImageToCiphertext {
             }
 
             // now using dna compliment rule no. 4 convert it to the dna cipher text and write it to Dna_compliment_cipher.txt
-            String dnaComplimentRule4 = DNAComplimentRule4(dnaCipherText);
+             dnaComplimentRule4 = DNAComplimentRule4(dnaCipherText);
             try (FileWriter writer = new FileWriter(" Dna_compliment_cipher.txt")) {
                 writer.write(dnaComplimentRule4);
             } catch (IOException e) {
@@ -124,11 +127,85 @@ public class ImageToCiphertext {
                 e.printStackTrace();
             }
 
+
+            FileWriter writer = new FileWriter("Final_XOR_cipher.txt");
+            writer.write(finalCipherText);
+
+            //encrypted image getting starts from here
+            st = new StringBuilder();
+
+            for (int i = 0; i < XORConvertedString.length(); i++) {
+                char base = XORConvertedString.charAt(i);
+                switch (base) {
+                    case 'C':
+                        st.append("11");
+                        break;
+                    case 'G':
+                        st.append("00");
+                        break;
+                    case 'T':
+                        st.append("01");
+                        break;
+                    case 'A':
+                        st.append("10");
+                        break;
+                    default:
+
+                }
+            }
+            try {
+                String rs = st.toString();
+                //System.out.println("resultString: "+ rs);
+                byte[] byteArray1 = convertBinaryStringToByteArray(rs);
+
+                // Check if the byte array is null or empty
+                if (byteArray1 == null || byteArray1.length == 0) {
+                    System.out.println("The byte array is null or empty.");
+                    return;
+                }
+
+                // Create a ByteArrayInputStream from the byte array
+                ByteArrayInputStream byteArrayInputStream1 = new ByteArrayInputStream(byteArray1);
+
+                System.out.println("encrypted image bytestream array: "+ Arrays.toString(byteArrayInputStream1.readAllBytes()));
+
+                // Read the byte array into a BufferedImage
+                BufferedImage image1 = ImageIO.read(byteArrayInputStream1);
+                System.out.println("image1: "+ image1);
+
+//                 Check if the image is null
+                if (image1 == null) {
+                    System.out.println("The BufferedImage is null.");
+                    return;
+                }
+
+                // Save the BufferedImage to a file (optional)
+                File outputFile = new File("encryptedImage.jpg");
+                ImageIO.write(image1, "jpg", outputFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            //ends here
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+        
+     
+        
     }
 
+
+
+
+
+
+    // All methods start from here
+    //
+    //
     private static String convertTo64BitBinaryBlock(String dnaComplimentRule4) {
         int len1 = dnaComplimentRule4.length()  /  64;
         int len2= dnaComplimentRule4.length()  - (64*len1);
@@ -179,6 +256,8 @@ public class ImageToCiphertext {
 
             // Convert the byte array to a binary string
             byte[] byteArray = byteArrayOutputStream.toByteArray();
+            System.out.println("inputted Images byte array: "+ Arrays.toString(byteArray));
+            System.out.println("==========================END-=--------------------------------------================");
             StringBuilder binaryString = new StringBuilder();
             for (byte b : byteArray) {
                 for (int i = 7; i >= 0; i--) {
@@ -308,6 +387,28 @@ public class ImageToCiphertext {
             default:
                 return  -1;
         }
+    }
+
+
+
+    //for getting encryptrd images
+    public static byte[] convertBinaryStringToByteArray(String binaryString) {
+        int len = binaryString.length();
+        int paddedLen = (len + 7) / 8 * 8; // Round up to the nearest multiple of 8
+        byte[] byteArray = new byte[paddedLen / 8];
+
+        // Pad the binary string with zeros
+        while (binaryString.length() < paddedLen) {
+            binaryString = "0" + binaryString;
+        }
+
+        for (int i = 0; i < paddedLen; i += 8) {
+            String byteString = binaryString.substring(i, i + 8);
+            byte b = (byte) Integer.parseInt(byteString, 2);
+            byteArray[i / 8] = b;
+        }
+
+        return byteArray;
     }
 
 
