@@ -1,0 +1,64 @@
+#include <stdio.h>
+    int numberOfProcesses,
+    arrivalTime[10],burstTime[10],waitingTime[10] ,totalBurstTime = 0, minIdx, pOrder[100], cIndex, fTime[10], pPriority[10];
+    float avgTATime = 0.0, avgWTime = 0.0;
+int main() {
+
+    printf("Total orcesses? :");
+    scanf("%d",&numberOfProcesses);
+    for (i=0;i<numberOfProcesses;i++) {
+        printf("Enter the arrival time %d:\n", i+1);
+        scanf("%d", &arrivalTime[i]);
+        waitingTime[i] = 0;
+    }
+
+     for(i=0;i<numberOfProcesses;i++){
+        printf("Enter the burst time %d:\n", i+1);
+        scanf("%d", &burstTime[i]);
+        totalBurstTime+=burstTime[i];
+    }
+
+    for(i=0;i<numberOfProcesses;i++) {
+        //sorting based on arrival time
+        int x;
+        for (j=i+1;j<numberOfProcesses;j++) {
+            if (arrivalTime[i]>arrivalTime[j]) {
+                x=arrivalTime[i];
+                arrivalTime[i]=arrivalTime[j];
+                arrivalTime[j]=x;
+                x=burstTime[i];
+                burstTime[i]=burstTime[j];
+                burstTime[j]=x;
+            }
+        }
+    }
+
+    for (i = 0; i < totalBurstTime; i++) {
+        minIdx = 700000;
+        for (j = 0; j < numberOfProcesses; j++) {
+            if ((burstTime[j] != 0) && (arrivalTime[j] <= i) && (burstTime[j] < minIdx)) {
+                minIdx = burstTime[j];
+                cIndex = j;
+            }
+        }
+        burstTime[cIndex]--;
+        pOrder[i] = cIndex;
+    }
+    cIndex = 0;
+    for (i = 0; i < totalBurstTime; i++) {
+        for (j = 0; j < numberOfProcesses; j++) {
+            if (pOrder[i] == j) {
+                fTime[j] = i;
+                waitingTime[j]++;
+            }
+        }
+    }
+
+    for (i = 0; i < numberOfProcesses; i++) {
+        printf("\n PROCESS %d:-FINISH TIME==> %d TURNAROUND TIME==>%d WAITING TIME==>%d\n", i + 1, fTime[i] + 1, (fTime[i] - arrivalTime[i]) + 1, (((fTime[i] + 1) - waitingTime[i]) - arrivalTime[i]));
+        avgWTime = avgWTime + (((fTime[i] + 1) - waitingTime[i]) - arrivalTime[i]);
+        avgTATime = avgTATime + ((fTime[i] - arrivalTime[i]) + 1);
+    }
+
+    return 0;
+}

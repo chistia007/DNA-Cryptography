@@ -11,13 +11,19 @@ public class ImageToCiphertext {
     private static String dnaComplimentRule4;
    public static void main(String[] args) {
 
+       encrption();
+
+    }
+
+
+    public static void encrption(){
         // key matrix generation first
-        String matrixDNASequence = RandomDnaMatrixGeneration. generateRandomDNASequence(256);
-       System.out.println("matrixDNASequence: "+ matrixDNASequence);
+        String matrixDNASequence = RandomDnaMatrixGeneration. generateRandomDNASequence(1024);
+        System.out.println("matrixDNASequence: "+ matrixDNASequence);
         String[][] keyMatrix = RandomDnaMatrixGeneration.convertToMatrix(matrixDNASequence);
 
-       //Print the resulting matrix
-        System.out.println("8x8 Matrix:");
+        //Print the resulting matrix
+        System.out.println("16x16 Matrix:");
         for (String[] row : keyMatrix) {
             for (String element : row) {
                 System.out.print(element + " ");
@@ -53,16 +59,16 @@ public class ImageToCiphertext {
             }
 
             // now using dna compliment rule no. 4 convert it to the dna cipher text and write it to Dna_compliment_cipher.txt
-             dnaComplimentRule4 = DNAComplimentRule4(dnaCipherText);
+            dnaComplimentRule4 = DNAComplimentRule4(dnaCipherText);
             try (FileWriter writer = new FileWriter(" Dna_compliment_cipher.txt")) {
                 writer.write(dnaComplimentRule4);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            // covert the dnaComplimentRule4 into 64 bit binary bit block and if the last block is not 64 bit then add padding (add X for Padding)
+            // covert the dnaComplimentRule4 into 256 bit binary bit block and if the last block is not 256 bit then add padding (add X for Padding)
             //padding
             // and write it to padded_DNA_cipher.txt
-            String paddedDNASequence = convertTo64BitBinaryBlock(dnaComplimentRule4);
+            String paddedDNASequence = convertTo256BitBinaryBlock(dnaComplimentRule4);
             try (FileWriter writer = new FileWriter("paddedDNACompliment_cipher.txt")) {
                 writer.write(paddedDNASequence);
             } catch (IOException e) {
@@ -70,7 +76,7 @@ public class ImageToCiphertext {
             }
 
             // TODO : to select to colums from keyMatrix and forming the 64 bit key, then XOR with the paddedDNASequence
-            // select the 2 columns from keyMatrix. select 0th and 4th index column if first bit of paddedDNASequence is A
+            // select the 4 columns from keyMatrix. select 0th and 4th index column if first bit of paddedDNASequence is A
             // select the 1st and 5th index column if first bit of paddedDNASequence is C
             // select the 2nd and 6th index column if first bit of paddedDNASequence is T
             // select the 3rd and 7th index column if first bit of paddedDNASequence is G
@@ -79,30 +85,40 @@ public class ImageToCiphertext {
             String firstBit= String.valueOf(paddedDNASequence.charAt(0));
             int idx1= 0;
             int idx2=0;
+            int idx3=0;
+            int idx4=0;
             switch (firstBit){
                 case "A" :
                     idx1=0;
                     idx2=4;
+                    idx3=8;
+                    idx4=9;
                     break;
                 case "C" :
                     idx1=1;
                     idx2=5;
+                    idx3=14;
+                    idx4=15;
                     break;
                 case "T" :
                     idx1=2;
                     idx2=6;
+                    idx3=12;
+                    idx4=13;
                     break;
                 case "G" :
                     idx1=3;
                     idx2=7;
+                    idx3=10;
+                    idx4=11;
                     break;
             }
 
 
             //selecting column wise , but generating key row wise
-            for (int i=0; i<8; i++){
-                for (int j=0; j<8; j++){
-                    if (j==idx1 || j==idx2){
+            for (int i=0; i<16; i++){
+                for (int j=0; j<16; j++){
+                    if (j==idx1 || j==idx2 || j==idx3 || j==idx4){
                         key=key+keyMatrix[i][j];
                     }
                 }
@@ -110,7 +126,7 @@ public class ImageToCiphertext {
             }
 
             System.out.println("key:   "+ key);
-            
+
             // now we have to do XOR to the dnaCipherText
             String XORConvertedString = DNASequencetoXORConverstion(paddedDNASequence);
             try (FileWriter writer = new FileWriter("XOR_cipher.txt")) {
@@ -131,7 +147,21 @@ public class ImageToCiphertext {
             FileWriter writer = new FileWriter("Final_XOR_cipher.txt");
             writer.write(finalCipherText);
 
-            //encrypted image getting starts from here
+
+
+
+
+
+
+
+
+            //
+            //
+            //
+            //encrypted image pixels getting starts from here
+            //
+            //
+            //
             st = new StringBuilder();
 
             for (int i = 0; i < XORConvertedString.length(); i++) {
@@ -193,25 +223,24 @@ public class ImageToCiphertext {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
-     
-        
+
     }
 
 
 
 
-
-
-    // All methods start from here
-    //
-    //
-    private static String convertTo64BitBinaryBlock(String dnaComplimentRule4) {
-        int len1 = dnaComplimentRule4.length()  /  64;
-        int len2= dnaComplimentRule4.length()  - (64*len1);
+//
+//
+//
+// All methods start from here
+//
+//
+    private static String convertTo256BitBinaryBlock(String dnaComplimentRule4) {
+        int len1 = dnaComplimentRule4.length()  /  256;
+        int len2= dnaComplimentRule4.length()  - (256*len1);
 
         if (len2 != 0) {
-            int padding = 64 - len2;
+            int padding = 256 - len2;
             for (int i = 0; i < padding; i++) {
                 dnaComplimentRule4 = dnaComplimentRule4 + "X";
             }
@@ -343,7 +372,7 @@ public class ImageToCiphertext {
                 j=0;
             }
 
-            if(i>=0 && i<=63){
+            if(i>=0 && i<=255){
                 result.append(dnaCipherText.charAt(i));
                 continue;
             }

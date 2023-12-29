@@ -20,14 +20,14 @@ public class RandomDnaMatrixGeneration {
 
     // Function to convert a 256-bit DNA sequence into an 8x8 matrix
     public static String[][] convertToMatrix(String dnaSequence) {
-        if (dnaSequence.length() != 256) {
+        if (dnaSequence.length() != 1024) {
             throw new IllegalArgumentException("DNA sequence length must be 256 bits");
         }
 
-        String[][] matrix = new String[8][8];
+        String[][] matrix = new String[16][16];
         int index = 0;
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 16; j++) {
                 matrix[i][j] = dnaSequence.substring(index, index + 4);
                 index += 4;
             }
