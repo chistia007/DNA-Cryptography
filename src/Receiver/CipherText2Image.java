@@ -79,9 +79,13 @@ public class CipherText2Image {
 
         }
 
-    private static void decryption() throws IOException {
+    public static void decryption() throws IOException {
         // Convert the XOR cipher text back to the original DNA sequence
         // but before that remove all paddings
+        if(cipherText==null){
+            String xorCipherText = readXORCipherText();
+            cipherText = xorCipherText.substring(1024);
+        }
         cipherText= cipherText.replace("X","");
         // now do XOR operation, if you find Y and Z then ignore that [do not run XOR operation on that]. also ignore the first 64 bits
         String dnaSequence = XORtoDNA(cipherText);
@@ -93,7 +97,7 @@ public class CipherText2Image {
         // Convert the DNA sequence back to binary
         // do not forget the conversion of Y=0 and Z=1
         binaryString = DNAtoBinary(regularDnaSeq);
-        System.out.println(binaryString);
+        System.out.println("binary String : "+binaryString);
 
 
 
@@ -141,7 +145,7 @@ public class CipherText2Image {
     //functions start here
     //
     //
-    private static String readXORCipherText() throws IOException {
+    public static String readXORCipherText() throws IOException {
         StringBuilder xorCipherText = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader("Final_XOR_cipher.txt"))) {
             String line;
@@ -302,6 +306,13 @@ public class CipherText2Image {
         }
 
         return byteArray;
+    }
+
+
+
+
+    public String getDecryptedBinaryString() {
+        return binaryString;
     }
 
 }
