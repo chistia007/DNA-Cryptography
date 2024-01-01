@@ -1,24 +1,52 @@
 package Receiver;
 
+import Sender.AES;
 import Sender.RandomDnaMatrixGeneration;
 
+import javax.crypto.*;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Base64;
 
 public class CipherText2Image {
    public static String binaryString;
     public static String key="";
      private static String cipherText;
      private static boolean inTestPhase = false;
-    public static void main(String[] args) throws IOException {
-            // Read the final XOR cipher text from XOR_cipher.txt
-            String xorCipherText = readXORCipherText();
+    public static void main(String[] args) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException {
+        //Decrypt the Aes first to get the final XOR cipher text that contains the 1024 bit key matrix
 
-            //seprate the key from the cipher text
-            String matrixDNASequence  = xorCipherText.substring(0, 1024);
 
-             cipherText = xorCipherText.substring(1024);
+//        AES aes = new AES();
+//        SecretKey secretKey=aes.loadSecretKey("secretKey.txt");
+//       GCMParameterSpec gcmParameterSpec= aes.loadGCMParameterSpec("gcmParameterSpec.txt");
+//
+//
+//        // Read the final XOR cipher text from XOR_cipher.txt
+//        String xorCipherText = readXORCipherText();
+//
+//        // Decrypt the XOR cipher text
+//        Cipher cipher = Cipher.getInstance("AES/ResultTeseting.GCM/NoPadding");
+//
+//        byte[] dd = Base64.getDecoder().decode(xorCipherText);
+//        cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec);
+//        byte[] decryptedBytes = cipher.doFinal(dd);
+//        String cipherText = new String(decryptedBytes);
+
+
+//        String decryptedText = readDecryptedText();
+//        System.out.println("decrypted text: "+ decryptedText);
+        cipherText = readDecryptedText();
+
+        // Separate the key and cipher text
+        String matrixDNASequence = cipherText.substring(0, 1024);
+         cipherText = cipherText.substring(1024);
 
         //generate key matrix
         String [][] keyMatrix = RandomDnaMatrixGeneration.convertToMatrix(matrixDNASequence);
@@ -97,7 +125,10 @@ public class CipherText2Image {
         // Convert the DNA sequence back to binary
         // do not forget the conversion of Y=0 and Z=1
         binaryString = DNAtoBinary(regularDnaSeq);
-        System.out.println("binary String : "+binaryString);
+        //write it as outputimagebinary.txt
+        try (FileWriter writer = new FileWriter("outputimagebinary.txt")) {
+            writer.write(binaryString);
+        }
 
 
 
@@ -156,6 +187,18 @@ public class CipherText2Image {
         return xorCipherText.toString();
     }
 
+    //read decryptedfcm.txt
+    public static String readDecryptedText() throws IOException {
+        StringBuilder xorCipherText1 = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader("decryptedDCM.txt"))) {
+            String line1;
+            while ((line1 = reader.readLine()) != null) {
+                xorCipherText1.append(line1);
+            }
+        }
+        return xorCipherText1.toString();
+    }
+
     private static String XORtoDNA(String dnaCipherText) {
         // Define the XOR table
         char[][] xorTable = {
@@ -194,7 +237,8 @@ public class CipherText2Image {
                     // Append the XOR result to the result string
                     result.append(xorResult);}
                 catch (Exception e){
-                    System.out.println("base1: "+ base1+check);
+//                    System.out.println(e.getMessage());
+//                    System.out.println("base1: "+ base1+check);
                 }
             }
         }

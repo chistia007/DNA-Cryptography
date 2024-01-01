@@ -1,5 +1,7 @@
 package Sender;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -9,6 +11,9 @@ public class ImageToCiphertext {
    private static String key="";
    private static StringBuilder st;
     private static String dnaComplimentRule4;
+
+    public static SecretKey secretKey;
+    public static GCMParameterSpec gcmParameterSpec;
    public static void main(String[] args) {
 
        encrption();
@@ -137,16 +142,31 @@ public class ImageToCiphertext {
 
             // add matrixDNASequence to the XORConvertedString; concat them
             String finalCipherText= matrixDNASequence+XORConvertedString;
-            try (FileWriter writer = new FileWriter("Final_XOR_cipher.txt")) {
+           // System.out.println("finalCipherText: "+ finalCipherText);
+            try (FileWriter writer = new FileWriter("decryptedDCM.txt")) {
                 writer.write(finalCipherText);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-
+            AES encryption;
+            String encryptedText= "";
+            AES aes = new AES();
+            try {
+                 encryptedText = aes.GCMEncryption(finalCipherText);
+              //  System.out.println("Encrypted Text: " + encryptedText);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             FileWriter writer = new FileWriter("Final_XOR_cipher.txt");
-            writer.write(finalCipherText);
+            writer.write(encryptedText);
 
+            String encryptedBinary=convertTextToBinaryString(encryptedText);
+            try (FileWriter writer1 = new FileWriter("encryptedImageBinary.txt")) {
+                writer1.write(encryptedBinary);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
 
 
@@ -285,7 +305,7 @@ public class ImageToCiphertext {
 
             // Convert the byte array to a binary string
             byte[] byteArray = byteArrayOutputStream.toByteArray();
-            System.out.println("inputted Images byte array: "+ Arrays.toString(byteArray));
+           // System.out.println("inputted Images byte array: "+ Arrays.toString(byteArray));
             System.out.println("==========================END-=--------------------------------------================");
             StringBuilder binaryString = new StringBuilder();
             for (byte b : byteArray) {
@@ -299,6 +319,22 @@ public class ImageToCiphertext {
             return null;
         }
     }
+
+
+    public static String convertTextToBinaryString(String text) {
+        byte[] byteArray = text.getBytes();
+        System.out.println("inputted Images byte array1: "+ Arrays.toString(byteArray));
+        StringBuilder binaryString = new StringBuilder();
+
+        for (byte b : byteArray) {
+            for (int i = 7; i >= 0; i--) {
+                binaryString.append((b >> i) & 1);
+            }
+        }
+
+        return binaryString.toString();
+    }
+
 
 
 
@@ -438,6 +474,13 @@ public class ImageToCiphertext {
         }
 
         return byteArray;
+    }
+
+    public GCMParameterSpec getGcmParameterSpec() {
+        return gcmParameterSpec;
+    }
+    public SecretKey getSecretKey() {
+        return secretKey;
     }
 
 
