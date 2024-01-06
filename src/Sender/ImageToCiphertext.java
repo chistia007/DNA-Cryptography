@@ -5,6 +5,7 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class ImageToCiphertext {
@@ -41,7 +42,7 @@ public class ImageToCiphertext {
 
         // image to binary conversion part
         // Specify the path to your image file
-        String imagePath = "x-ray.jpg";
+        String imagePath = "brain-scan.jpg";
 
         try {
             // Read the image into a BufferedImage
@@ -49,7 +50,7 @@ public class ImageToCiphertext {
 
             // Convert the BufferedImage to a binary string
             String binaryString = convertImageToBinaryString(image);
-            try (FileWriter writer = new FileWriter("binary.txt")) {
+            try (FileWriter writer = new FileWriter("binary1.txt")) {
                 writer.write(binaryString);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -182,59 +183,79 @@ public class ImageToCiphertext {
             //
             //
             //
-            st = new StringBuilder();
+            //new code
 
-            for (int i = 0; i < XORConvertedString.length(); i++) {
-                char base = XORConvertedString.charAt(i);
-                switch (base) {
-                    case 'C':
-                        st.append("11");
-                        break;
-                    case 'G':
-                        st.append("00");
-                        break;
-                    case 'T':
-                        st.append("01");
-                        break;
-                    case 'A':
-                        st.append("10");
-                        break;
-                    default:
+            // Decode base64 to binary data
+            byte[] binaryData = java.util.Base64.getDecoder().decode(encryptedText);
 
-                }
-            }
-            try {
-                String rs = st.toString();
-                //System.out.println("resultString: "+ rs);
-                byte[] byteArray1 = convertBinaryStringToByteArray(rs);
+            // Unpack binary data into a list of signed 8-bit integers
+            ByteBuffer byteBuffer = ByteBuffer.wrap(binaryData);
+            byte[] pixelArray = new byte[binaryData.length];
+            byteBuffer.get(pixelArray);
 
-                // Check if the byte array is null or empty
-                if (byteArray1 == null || byteArray1.length == 0) {
-                    System.out.println("The byte array is null or empty.");
-                    return;
-                }
-
-                // Create a ByteArrayInputStream from the byte array
-                ByteArrayInputStream byteArrayInputStream1 = new ByteArrayInputStream(byteArray1);
-
-                System.out.println("encrypted image bytestream array: "+ Arrays.toString(byteArrayInputStream1.readAllBytes()));
-
-                // Read the byte array into a BufferedImage
-                BufferedImage image1 = ImageIO.read(byteArrayInputStream1);
-                System.out.println("image1: "+ image1);
-
-//                 Check if the image is null
-                if (image1 == null) {
-                    System.out.println("The BufferedImage is null.");
-                    return;
-                }
-
-                // Save the BufferedImage to a file (optional)
-                File outputFile = new File("encryptedImage.jpg");
-                ImageIO.write(image1, "jpg", outputFile);
+           //write pixel array to a txt file
+            try (FileWriter writer1 = new FileWriter("encryptedImagePixels404.txt")) {
+                writer1.write(Arrays.toString(pixelArray));
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+
+
+            //old code
+//            st = new StringBuilder();
+//
+//            for (int i = 0; i < XORConvertedString.length(); i++) {
+//                char base = XORConvertedString.charAt(i);
+//                switch (base) {
+//                    case 'C':
+//                        st.append("11");
+//                        break;
+//                    case 'G':
+//                        st.append("00");
+//                        break;
+//                    case 'T':
+//                        st.append("01");
+//                        break;
+//                    case 'A':
+//                        st.append("10");
+//                        break;
+//                    default:
+//
+//                }
+//            }
+//            try {
+//                String rs = st.toString();
+//                //System.out.println("resultString: "+ rs);
+//                byte[] byteArray1 = convertBinaryStringToByteArray(rs);
+//
+//                // Check if the byte array is null or empty
+//                if (byteArray1 == null || byteArray1.length == 0) {
+//                    System.out.println("The byte array is null or empty.");
+//                    return;
+//                }
+//
+//                // Create a ByteArrayInputStream from the byte array
+//                ByteArrayInputStream byteArrayInputStream1 = new ByteArrayInputStream(byteArray1);
+//
+//                System.out.println("encrypted image bytestream array: "+ Arrays.toString(byteArrayInputStream1.readAllBytes()));
+//
+//                // Read the byte array into a BufferedImage
+//                BufferedImage image1 = ImageIO.read(byteArrayInputStream1);
+//                System.out.println("image1: "+ image1);
+//
+////                 Check if the image is null
+//                if (image1 == null) {
+//                    System.out.println("The BufferedImage is null.");
+//                    return;
+//                }
+//
+//                // Save the BufferedImage to a file (optional)
+//                File outputFile = new File("encryptedImage.jpg");
+//                ImageIO.write(image1, "jpg", outputFile);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
 
 
             //ends here
@@ -306,6 +327,12 @@ public class ImageToCiphertext {
             // Convert the byte array to a binary string
             byte[] byteArray = byteArrayOutputStream.toByteArray();
            // System.out.println("inputted Images byte array: "+ Arrays.toString(byteArray));
+            //write it as inputtedimagepixel.txt
+            try (FileWriter writer = new FileWriter("inputtedImagePixel.txt")) {
+                writer.write(Arrays.toString(byteArray));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             System.out.println("==========================END-=--------------------------------------================");
             StringBuilder binaryString = new StringBuilder();
             for (byte b : byteArray) {
@@ -323,7 +350,7 @@ public class ImageToCiphertext {
 
     public static String convertTextToBinaryString(String text) {
         byte[] byteArray = text.getBytes();
-        System.out.println("inputted Images byte array1: "+ Arrays.toString(byteArray));
+       // System.out.println("inputted Images byte array1: "+ Arrays.toString(byteArray));
         StringBuilder binaryString = new StringBuilder();
 
         for (byte b : byteArray) {
