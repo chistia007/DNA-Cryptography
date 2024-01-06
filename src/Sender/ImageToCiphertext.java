@@ -6,6 +6,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 public class ImageToCiphertext {
@@ -16,8 +17,14 @@ public class ImageToCiphertext {
     public static SecretKey secretKey;
     public static GCMParameterSpec gcmParameterSpec;
    public static void main(String[] args) {
+       long startTime = System.currentTimeMillis();
 
        encrption();
+
+       long endTime = System.currentTimeMillis();
+       long duration = endTime - startTime;
+
+       System.out.println("Time taken: " + duration + " miliseconds");
 
     }
 
@@ -25,17 +32,8 @@ public class ImageToCiphertext {
     public static void encrption(){
         // key matrix generation first
         String matrixDNASequence = RandomDnaMatrixGeneration. generateRandomDNASequence(1024);
-        System.out.println("matrixDNASequence: "+ matrixDNASequence);
         String[][] keyMatrix = RandomDnaMatrixGeneration.convertToMatrix(matrixDNASequence);
 
-        //Print the resulting matrix
-        System.out.println("16x16 Matrix:");
-        for (String[] row : keyMatrix) {
-            for (String element : row) {
-                System.out.print(element + " ");
-            }
-            System.out.println();
-        }
 
 
 
@@ -131,7 +129,6 @@ public class ImageToCiphertext {
 
             }
 
-            System.out.println("key:   "+ key);
 
             // now we have to do XOR to the dnaCipherText
             String XORConvertedString = DNASequencetoXORConverstion(paddedDNASequence);
@@ -143,19 +140,16 @@ public class ImageToCiphertext {
 
             // add matrixDNASequence to the XORConvertedString; concat them
             String finalCipherText= matrixDNASequence+XORConvertedString;
-           // System.out.println("finalCipherText: "+ finalCipherText);
             try (FileWriter writer = new FileWriter("decryptedDCM.txt")) {
                 writer.write(finalCipherText);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            AES encryption;
             String encryptedText= "";
             AES aes = new AES();
             try {
-                 encryptedText = aes.GCMEncryption(finalCipherText);
-              //  System.out.println("Encrypted Text: " + encryptedText);
+                 encryptedText = aes.CBCEncryption(finalCipherText);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -168,13 +162,6 @@ public class ImageToCiphertext {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-
-
-
-
-
-
 
             //
             //
@@ -333,7 +320,6 @@ public class ImageToCiphertext {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            System.out.println("==========================END-=--------------------------------------================");
             StringBuilder binaryString = new StringBuilder();
             for (byte b : byteArray) {
                 for (int i = 7; i >= 0; i--) {

@@ -5,6 +5,7 @@ import Sender.RandomDnaMatrixGeneration;
 
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -23,26 +24,24 @@ public class CipherText2Image {
         //Decrypt the Aes first to get the final XOR cipher text that contains the 1024 bit key matrix
 
 
-//        AES aes = new AES();
-//        SecretKey secretKey=aes.loadSecretKey("secretKey.txt");
-//       GCMParameterSpec gcmParameterSpec= aes.loadGCMParameterSpec("gcmParameterSpec.txt");
-//
-//
-//        // Read the final XOR cipher text from XOR_cipher.txt
-//        String xorCipherText = readXORCipherText();
-//
-//        // Decrypt the XOR cipher text
-//        Cipher cipher = Cipher.getInstance("AES/ResultTeseting.GCM/NoPadding");
-//
-//        byte[] dd = Base64.getDecoder().decode(xorCipherText);
-//        cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec);
-//        byte[] decryptedBytes = cipher.doFinal(dd);
-//        String cipherText = new String(decryptedBytes);
+        AES aes = new AES();
+        SecretKey secretKey = aes.loadSecretKey("secretKey.txt");
+        IvParameterSpec ivParameterSpec = aes.loadIV("IVParameterSpec.txt"); // Updated filename
+
+         // Read the final XOR cipher text from XOR_cipher.txt
+        String xorCipherText = readXORCipherText();
 
 
-//        String decryptedText = readDecryptedText();
-//        System.out.println("decrypted text: "+ decryptedText);
-        cipherText = readDecryptedText();
+        // Decrypt the XOR cipher text
+        Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
+
+        byte[] dd = Base64.getDecoder().decode(xorCipherText);
+        cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec);
+        byte[] decryptedBytes = cipher.doFinal(dd);
+         cipherText = new String(decryptedBytes);
+
+
+
 
         // Separate the key and cipher text
         String matrixDNASequence = cipherText.substring(0, 1024);
@@ -98,9 +97,6 @@ public class CipherText2Image {
                 }
 
             }
-
-            System.out.println("key:   "+ key);
-
          decryption();
 
 
@@ -120,7 +116,6 @@ public class CipherText2Image {
 
         //do dna compliment rule 4 on the dna sequence except ""Y" and "Z"
         String regularDnaSeq= DNAComplimentRule4(dnaSequence);
-        System.out.println("DNA sequence: "+ regularDnaSeq);
 
         // Convert the DNA sequence back to binary
         // do not forget the conversion of Y=0 and Z=1
@@ -146,30 +141,15 @@ public class CipherText2Image {
 
         // Read the byte array into a BufferedImage
         BufferedImage image = ImageIO.read(byteArrayInputStream);
-
         // Check if the image is null
         if (image == null) {
             System.out.println("The BufferedImage is null.");
             return;
         }
-
         // Save the BufferedImage to a file (optional)
         File outputFile = new File("output.jpg");
         ImageIO.write(image, "jpg", outputFile);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     //
     //
@@ -237,8 +217,8 @@ public class CipherText2Image {
                     // Append the XOR result to the result string
                     result.append(xorResult);}
                 catch (Exception e){
-//                    System.out.println(e.getMessage());
-//                    System.out.println("base1: "+ base1+check);
+                    System.out.println(e.getMessage());
+
                 }
             }
         }
